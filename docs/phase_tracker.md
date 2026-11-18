@@ -18,28 +18,93 @@ Set a milestone to **Blocked** if one of its required items is blocked. Set it t
 | Area | Status | Evidence / notes |
 |---|---|---|
 | Repository bootstrap | Complete | Git initialized; initial commit `2dcb06a` (`chore: initialize Knowcast repository`); branch `main` tracks `origin/main`; clean status observed on 2026-11-18. |
-| Phase 1 backend | Not started | No backend implementation exists yet. |
-| Overall Phase 1 | Not started | Milestones 1–7 below are the scope of this tracker. Future mobile and product phases are out of scope. |
+| Phase 1 backend | In progress | Chunk 1 settings and project configuration are implemented; remaining foundation chunks are not started. |
+| Overall Phase 1 | In progress | Milestones 1–7 below are the scope of this tracker. Future mobile and product phases are out of scope. |
 
 ## Milestone tracker
 
 ### Milestone 1 — Backend foundation
 
-**Status:** Not started
+**Status:** In progress
 
 **Goal:** Establish the backend structure and local development foundation.
 
 **Acceptance:** The backend starts locally, exposes health checks, applies initial database migrations, and passes foundation tests. Architecture documentation describes the resulting structure.
 
-- [ ] Inspect the repository and establish the agreed backend project structure.
-- [ ] Configure FastAPI and centralized environment settings.
-- [ ] Configure PostgreSQL, SQLAlchemy, and Alembic with an initial migration.
-- [ ] Configure Redis and Celery for background processing.
-- [ ] Add Docker Compose for the local development services.
-- [ ] Add health checks, foundation tests, and architecture documentation.
-- **Test gate:** Run Ruff and relevant pytest tests; verify local startup and health checks.
-- **Evidence / results:** Not started.
-- **Blockers / decisions:** None recorded.
+**Implementation branch:** Create `feat/backend-foundation` before starting the first code chunk. Keep all Milestone 1 implementation changes on that branch.
+
+Complete the chunks in order. Start each chunk only after its plan is approved. Update its status, evidence, test result, and blockers as work progresses.
+
+#### Chunk 1 — Project structure and configuration
+
+**Status:** Complete
+
+**Goal:** Establish the backend folders, dependencies, centralized settings, and environment example.
+
+- [x] Inspect existing files and establish the backend structure from the engineering brief.
+- [x] Add the baseline Python project/dependency configuration for the approved stack.
+- [x] Add centralized Pydantic settings and a safe `.env.example` with no secrets.
+- **Verification:** Confirm safe defaults and valid overrides work, invalid values fail with sanitized errors, root `.env` loading is independent of the working directory, `.env` is ignored, and `.env.example` remains trackable; run Ruff and focused tests.
+- **Evidence / test result:** Python 3.14.2; `.venv\Scripts\ruff.exe check .` passed; `.venv\Scripts\python.exe -m pytest` passed (5 tests). Root `.env` loaded from the `backend` working directory (`test WARNING`). `git check-ignore` confirmed `.env` is ignored and `.env.example` is trackable. Settings validation errors did not echo invalid input values.
+- **Blockers:** None recorded.
+
+#### Chunk 2 — FastAPI app and health checks
+
+**Status:** Not started
+
+**Goal:** Create the API application entry point and health endpoint.
+
+- [ ] Create the FastAPI application and minimal app startup wiring.
+- [ ] Add a health endpoint with a stable response.
+- [ ] Add focused tests for app startup and health responses.
+- **Verification:** Run Ruff and focused pytest tests; verify the endpoint locally.
+- **Evidence / test result:** Not started.
+- **Blockers:** None recorded.
+
+#### Chunk 3 — PostgreSQL, SQLAlchemy, and Alembic
+
+**Status:** Not started
+
+**Goal:** Establish database connection/session configuration and the migration workflow.
+
+- [ ] Configure PostgreSQL settings and SQLAlchemy engine/session handling.
+- [ ] Configure Alembic using the application settings and model metadata.
+- [ ] Add and apply the initial migration.
+- [ ] Add focused tests for database configuration and migration behavior.
+- **Verification:** Run Ruff and relevant pytest tests; verify the initial migration upgrades a local database.
+- **Evidence / test result:** Not started.
+- **Blockers:** None recorded.
+
+#### Chunk 4 — Redis and Celery
+
+**Status:** Not started
+
+**Goal:** Configure the background job infrastructure used by later pipeline milestones.
+
+- [ ] Configure Redis connection settings.
+- [ ] Configure the Celery application and task discovery.
+- [ ] Add a small worker smoke check and focused configuration tests.
+- **Verification:** Run Ruff and relevant pytest tests; verify a local worker can connect and execute the smoke task.
+- **Evidence / test result:** Not started.
+- **Blockers:** None recorded.
+
+#### Chunk 5 — Docker Compose and foundation closeout
+
+**Status:** Not started
+
+**Goal:** Run the foundation services together and document how the backend works locally.
+
+- [ ] Add Docker Compose for the API, PostgreSQL, and Redis services.
+- [ ] Verify local startup, health checks, database migration, and worker operation.
+- [ ] Complete foundation tests and write architecture/setup documentation.
+- [ ] Review all Milestone 1 acceptance criteria and record actual command results.
+- **Verification:** Run Ruff and the full relevant pytest suite; verify local startup and health checks end to end.
+- **Evidence / test result:** Not started.
+- **Blockers:** None recorded.
+
+**Milestone test gate:** All five chunks are complete; Ruff and relevant pytest checks pass; the backend starts locally, health checks respond, and the initial database migration applies. Record actual outputs below before marking the milestone complete.
+- **Milestone evidence / results:** Not started.
+- **Milestone blockers / decisions:** None recorded.
 
 ### Milestone 2 — ByteByteGo extraction
 
@@ -172,6 +237,7 @@ Retain resolved errors here so recovery steps are visible. Add a new entry rathe
 | Date | Area | Symptom | Resolution | Verification | Status |
 |---|---|---|---|---|---|
 | 2026-11-18 | Git bootstrap | Initial Git metadata write was denied in the restricted shell; the first push attempt also lacked interactive GitHub authentication. | Git metadata operations were retried with elevated access and GitHub authentication was completed. | User confirmed setup worked; repository later showed clean `main...origin/main`. | Resolved |
+| 2026-11-18 | Chunk 1 lint | Ruff reported import-order errors in the settings module and its tests. | Reordered imports to match Ruff's configured rules. | `.venv\Scripts\ruff.exe check .` passed after the fix. | Resolved |
 
 ## Decision and blocker log
 
