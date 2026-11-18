@@ -45,7 +45,9 @@ If something seems to need these, ask instead of building it.
 - A feature backed only by a placeholder or mock is NOT done. Say so honestly.
 
 ## Git
-- Never run `git commit`, `git push`, or rewrite history unless I explicitly ask.
+- For each new app feature, create a dedicated branch before implementation. Keep that feature's changes and commits on the branch. Run Ruff and all relevant tests; only after the required checks pass, commit the changes and push the branch to GitHub.
+- Do not merge feature branches or rewrite history unless I explicitly ask.
+- For work that is not a new app feature, do not run `git commit` or `git push` unless I explicitly ask.
 - At the end of each milestone, tell me what to review and suggest a commit message.
 - Commit format: `type: short description` (feat, fix, docs, test, refactor, chore).
   Example: `feat: establish backend foundation`
