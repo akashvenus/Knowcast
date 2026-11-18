@@ -1,0 +1,12 @@
+# Local environment values can contain secrets.
+.env
+
+# Python environments and generated files.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Test and lint caches.
+.pytest_cache/
+.ruff_cache/
