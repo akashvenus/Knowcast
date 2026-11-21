@@ -63,17 +63,18 @@ Complete the chunks in order. Start each chunk only after its plan is approved. 
 
 #### Chunk 3 — PostgreSQL, SQLAlchemy, and Alembic
 
-**Status:** Not started
+**Status:** Complete
 
 **Goal:** Establish database connection/session configuration and the migration workflow.
 
-- [ ] Configure PostgreSQL settings and SQLAlchemy engine/session handling.
-- [ ] Configure Alembic using the application settings and model metadata.
-- [ ] Add and apply the initial migration.
-- [ ] Add focused tests for database configuration and migration behavior.
-- **Verification:** Run Ruff and relevant pytest tests; verify the initial migration upgrades a local database.
-- **Evidence / test result:** Not started.
-- **Blockers:** None recorded.
+- [x] Configure optional PostgreSQL settings and lazy SQLAlchemy engine/session handling.
+- [x] Define all nine engineering-brief entities with UUID keys, timezone-aware timestamps, JSONB content, indexes, unique keys, and owned-record cascades.
+- [x] Configure Alembic with application settings and all model metadata; generate and manually review the initial migration.
+- [x] Add focused settings, session, metadata, and disposable PostgreSQL migration/integrity tests.
+- [x] Verify upgrade, repeat upgrade, downgrade to base, re-upgrade, unique email enforcement, and user-owned cascade deletion on PostgreSQL 16.
+- **Verification:** Ruff and the full pytest suite ran against the disposable local `knowcast_test` database.
+- **Evidence / test result:** `.venv\Scripts\ruff.exe check .` passed (`All checks passed!`). With `KNOWCAST_TEST_DATABASE_URL` pointed at a temporary PostgreSQL 16 container on `127.0.0.1:55432`, `.venv\Scripts\python.exe -m pytest -q` passed (21 tests, 0 skipped). The migration integration test completed upgrade → repeat upgrade → downgrade base → re-upgrade and passed PostgreSQL uniqueness/cascade checks. `.venv\Scripts\python.exe -m alembic -c backend\alembic.ini check` reported `No new upgrade operations detected.` The `/health` endpoint returned `200 {"status":"ok"}` with an unreachable database URL configured, confirming engine creation is lazy. Database credentials are optional; missing configuration produces a generic 503 only when a database session is requested. The migration keeps credentials out of `alembic.ini`.
+- **Blockers:** None.
 
 #### Chunk 4 — Redis and Celery
 
@@ -240,6 +241,9 @@ Retain resolved errors here so recovery steps are visible. Add a new entry rathe
 | 2026-11-18 | Chunk 1 lint | Ruff reported import-order errors in the settings module and its tests. | Reordered imports to match Ruff's configured rules. | `.venv\Scripts\ruff.exe check .` passed after the fix. | Resolved |
 | 2026-11-21 | Chunk 2 TestClient | Sandboxed Windows asyncio socket-pair setup caused TestClient requests to hang. | Ran the tests with local socket access; used Starlette's recommended `httpx2` transport alongside `httpx` for later newsletter fetching. | Full pytest suite passed (7 tests) without warnings. | Resolved |
 | 2026-11-21 | Chunk 2 dependency warning | Starlette warned that its `TestClient` use of plain `httpx` is deprecated. | Added `httpx2` for the current TestClient while retaining `httpx` for planned newsletter fetching. | Full pytest suite passed (7 tests) without warnings. | Resolved |
+| 2026-11-21 | Chunk 3 dependency install | Initial dependency installation could not reach the package index from the restricted environment. | Retried the approved package installation with network access. | SQLAlchemy, Alembic, Psycopg 3 and their dependencies installed successfully. | Resolved |
+| 2026-11-21 | Chunk 3 settings test | A URL containing a password was assumed malformed, but Pydantic correctly accepted it as a valid PostgreSQL DSN. | Changed the validation test to use an invalid port while checking that the password portion is absent from the error. | Full pytest suite passed; invalid URL validation did not reveal the secret. | Resolved |
+| 2026-11-21 | Chunk 3 Ruff | Ruff flagged import ordering and line length in newly added database modules and generated migration code. | Applied Ruff's import fixes and formatting, then corrected remaining long declarations. | `.venv\Scripts\ruff.exe check .` passed (`All checks passed!`). | Resolved |
 
 ## Decision and blocker log
 
@@ -252,3 +256,14 @@ Add decisions that affect implementation and unresolved blockers here. Link to a
 ## Milestone closeout record
 
 At the end of each milestone, add a dated entry with the files changed, decisions made, how to run the result, the purpose of each new module, test/lint commands and their actual output, open issues, what the user should review, and a suggested commit message. Do not create commits unless explicitly asked.
+
+### Chunk 3 closeout — 2026-11-21
+
+- **Files:** Added SQLAlchemy base/session modules; nine model modules; Alembic configuration, environment, template, and initial revision `178dc1618afc`; database settings and environment example; database and migration tests. Updated README, Ruff/pytest configuration, requirements, and this tracker.
+- **Decisions:** Database configuration remains optional; app construction creates an engine without opening a connection. Foreign keys cascade through owned rows; `audio_segments.content_block_id` and `ingestion_jobs.newsletter_id` use `SET NULL` so retained work records can outlive an individual content association. Multiple audio assets and ingestion jobs remain valid. PostgreSQL JSONB is limited to `content_blocks.content_json`.
+- **Modules:** `app/db/base.py` defines shared metadata and naming; `app/db/session.py` creates lazy engine/session factories and request-scoped cleanup; `app/models/` defines the nine schema entities; `migrations/env.py` reads configured settings and registers all models; the revision creates and drops the schema.
+- **Run locally:** Set `KNOWCAST_DATABASE_URL` in an ignored `.env`, install `backend/requirements.txt`, then run `.venv\Scripts\python.exe -m alembic -c backend\alembic.ini upgrade head`. Run checks with `.venv\Scripts\ruff.exe check .` and `.venv\Scripts\python.exe -m pytest -q`. Set `KNOWCAST_TEST_DATABASE_URL` only to a disposable database named `knowcast_test` to run the migration lifecycle test.
+- **Verification:** Ruff passed. Full pytest passed: **21 passed**. Disposable PostgreSQL 16 migration and integrity checks passed through upgrade, repeat upgrade, downgrade, re-upgrade, duplicate email rejection, and parent deletion cascade. Alembic schema drift check reported `No new upgrade operations detected.` No database service was needed for the unit suite or liveness endpoint.
+- **Open issues:** None for Chunk 3.
+- **Review guidance:** Review the initial schema revision and the chosen nullable email-ingestion URL / `SET NULL` relationships. The migration was generated and manually reviewed, then exercised through the full disposable-database lifecycle.
+- **Suggested commit:** `feat: establish database foundation`

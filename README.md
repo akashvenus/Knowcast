@@ -8,36 +8,30 @@ The current Phase 1 roadmap and progress record are in [docs/phase_tracker.md](d
 
 ```text
 Knowcast/
-├── .agents/                         # Project-specific agent instructions and skills
-│   └── skills/                      # Workflows for edge cases, file layout, and clear code
-│       ├── edge-case-detection/     # Prompts for resolving edge cases before planning
-│       ├── file-hierarchy/          # Repository layout and README requirements
-│       └── simple-code-structure/   # Guidelines for readable code
-├── backend/                          # Python backend application and tests
-│   ├── app/                          # Backend Python package
-│   │   ├── api/                      # HTTP route definitions
-│   │   │   ├── __init__.py           # API package marker
-│   │   │   └── health.py             # Infrastructure liveness route
-│   │   ├── core/                     # Centralized application settings
-│   │   │   ├── __init__.py           # Core package marker
-│   │   │   └── config.py             # Typed environment-backed settings
-│   │   ├── main.py                   # FastAPI app factory and ASGI entry point
-│   │   └── __init__.py               # Backend application package marker
-│   ├── tests/                        # Backend automated tests
-│   │   └── unit/                     # Unit tests organized like the app
-│   │       ├── api/                  # API route and app tests
-│   │       │   └── test_health.py    # Health response and startup validation tests
-│   │       └── core/                 # Tests for core application settings
-│   │           └── test_config.py    # Defaults, overrides, and validation tests
+├── .agents/                         # Project instructions and development skills
+├── backend/
+│   ├── app/
+│   │   ├── api/                      # Health route
+│   │   ├── core/                     # Pydantic application settings
+│   │   ├── db/                       # Declarative metadata and DB sessions
+│   │   ├── models/                   # Nine PostgreSQL entity models
+│   │   └── main.py                   # FastAPI app factory and ASGI entry point
+│   ├── migrations/
+│   │   ├── versions/                 # Initial schema migration
+│   │   └── env.py                    # Alembic settings and metadata wiring
+│   ├── tests/
+│   │   ├── integration/              # Disposable PostgreSQL migration test
+│   │   └── unit/                     # API, settings, session, and model tests
+│   ├── alembic.ini                   # Migration tool configuration
 │   └── requirements.txt              # Backend and development dependencies
-├── docs/                            # Project requirements and planning documents
-│   ├── ENGINEERING_BRIEF.md        # Phase 1 architecture, requirements, and milestones
-│   └── phase_tracker.md            # Current status, checklist, evidence, and issue history
-├── .env.example                     # Safe local settings template
-├── .gitignore                       # Excludes local secrets and generated files
-├── AGENTS.md                        # Project workflow and engineering rules
-├── pyproject.toml                   # Ruff and pytest configuration
-└── README.md                        # Project overview and repository map
+├── docs/
+│   ├── ENGINEERING_BRIEF.md          # Phase 1 requirements
+│   └── phase_tracker.md              # Roadmap, evidence, and issue history
+├── .env.example                      # Safe local settings template
+├── .gitignore                        # Excludes local secrets and generated files
+├── AGENTS.md                         # Project workflow and engineering rules
+├── pyproject.toml                    # Ruff and pytest configuration
+└── README.md                         # Overview and repository map
 ```
 
-The remaining backend folders listed in the engineering brief will be added incrementally as their milestones are approved and implemented.
+Folders for the remaining backend features will be added as their milestones are approved.

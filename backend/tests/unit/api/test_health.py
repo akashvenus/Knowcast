@@ -15,6 +15,21 @@ def test_health_endpoint_returns_minimal_success_response() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_health_endpoint_does_not_connect_to_configured_database(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An unreachable database does not affect application liveness."""
+    monkeypatch.setenv(
+        "KNOWCAST_DATABASE_URL",
+        "postgresql+psycopg://user:password@127.0.0.1:1/knowcast_test",
+    )
+    with TestClient(create_app()) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_invalid_settings_prevent_app_creation_without_echoing_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

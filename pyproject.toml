@@ -2,6 +2,7 @@
 testpaths = ["backend/tests"]
 pythonpath = ["backend"]
 addopts = "-ra"
+markers = ["integration: tests that use external local services such as PostgreSQL"]
 
 [tool.ruff]
 line-length = 100
