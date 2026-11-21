@@ -15,12 +15,18 @@ Knowcast/
 │       └── simple-code-structure/   # Guidelines for readable code
 ├── backend/                          # Python backend application and tests
 │   ├── app/                          # Backend Python package
+│   │   ├── api/                      # HTTP route definitions
+│   │   │   ├── __init__.py           # API package marker
+│   │   │   └── health.py             # Infrastructure liveness route
 │   │   ├── core/                     # Centralized application settings
 │   │   │   ├── __init__.py           # Core package marker
 │   │   │   └── config.py             # Typed environment-backed settings
+│   │   ├── main.py                   # FastAPI app factory and ASGI entry point
 │   │   └── __init__.py               # Backend application package marker
 │   ├── tests/                        # Backend automated tests
 │   │   └── unit/                     # Unit tests organized like the app
+│   │       ├── api/                  # API route and app tests
+│   │       │   └── test_health.py    # Health response and startup validation tests
 │   │       └── core/                 # Tests for core application settings
 │   │           └── test_config.py    # Defaults, overrides, and validation tests
 │   └── requirements.txt              # Backend and development dependencies

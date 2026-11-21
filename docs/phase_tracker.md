@@ -50,15 +50,15 @@ Complete the chunks in order. Start each chunk only after its plan is approved. 
 
 #### Chunk 2 — FastAPI app and health checks
 
-**Status:** Not started
+**Status:** Complete
 
 **Goal:** Create the API application entry point and health endpoint.
 
-- [ ] Create the FastAPI application and minimal app startup wiring.
-- [ ] Add a health endpoint with a stable response.
-- [ ] Add focused tests for app startup and health responses.
+- [x] Create the FastAPI application and minimal app startup wiring.
+- [x] Add a health endpoint with a stable response.
+- [x] Add focused tests for app startup and health responses.
 - **Verification:** Run Ruff and focused pytest tests; verify the endpoint locally.
-- **Evidence / test result:** Not started.
+- **Evidence / test result:** `.venv\Scripts\ruff.exe check .` passed. `.venv\Scripts\python.exe -m pytest` passed (7 tests, no warnings). A local Uvicorn smoke check returned `GET /health` → `{"status":"ok"}`. Response tests confirm no environment, version, or dependency details; invalid settings prevent app creation without echoing their values.
 - **Blockers:** None recorded.
 
 #### Chunk 3 — PostgreSQL, SQLAlchemy, and Alembic
@@ -238,6 +238,8 @@ Retain resolved errors here so recovery steps are visible. Add a new entry rathe
 |---|---|---|---|---|---|
 | 2026-11-18 | Git bootstrap | Initial Git metadata write was denied in the restricted shell; the first push attempt also lacked interactive GitHub authentication. | Git metadata operations were retried with elevated access and GitHub authentication was completed. | User confirmed setup worked; repository later showed clean `main...origin/main`. | Resolved |
 | 2026-11-18 | Chunk 1 lint | Ruff reported import-order errors in the settings module and its tests. | Reordered imports to match Ruff's configured rules. | `.venv\Scripts\ruff.exe check .` passed after the fix. | Resolved |
+| 2026-11-21 | Chunk 2 TestClient | Sandboxed Windows asyncio socket-pair setup caused TestClient requests to hang. | Ran the tests with local socket access; used Starlette's recommended `httpx2` transport alongside `httpx` for later newsletter fetching. | Full pytest suite passed (7 tests) without warnings. | Resolved |
+| 2026-11-21 | Chunk 2 dependency warning | Starlette warned that its `TestClient` use of plain `httpx` is deprecated. | Added `httpx2` for the current TestClient while retaining `httpx` for planned newsletter fetching. | Full pytest suite passed (7 tests) without warnings. | Resolved |
 
 ## Decision and blocker log
 
