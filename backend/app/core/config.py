@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # NON-OBVIOUS: repository-root environment file path
@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     database_url: PostgresDsn | None = None
+    redis_url: RedisDsn = RedisDsn("redis://localhost:6379/0")
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE_PATH,

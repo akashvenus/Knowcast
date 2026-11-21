@@ -78,16 +78,19 @@ Complete the chunks in order. Start each chunk only after its plan is approved. 
 
 #### Chunk 4 — Redis and Celery
 
-**Status:** Not started
+**Status:** Complete
 
 **Goal:** Configure the background job infrastructure used by later pipeline milestones.
 
-- [ ] Configure Redis connection settings.
-- [ ] Configure the Celery application and task discovery.
-- [ ] Add a small worker smoke check and focused configuration tests.
-- **Verification:** Run Ruff and relevant pytest tests; verify a local worker can connect and execute the smoke task.
-- **Evidence / test result:** Not started.
-- **Blockers:** None recorded.
+- [x] Configure a safe local Redis URL setting and environment example.
+- [x] Configure Celery Redis broker/result settings and explicit task discovery.
+- [x] Add a smoke task and unit tests for configuration, registration, and task output.
+- [x] Verify a live worker executes the smoke task against temporary Redis.
+- [x] Verify a worker reconnects when Redis becomes available after startup.
+- **Verification:** Run Ruff and the full pytest suite with disposable PostgreSQL and Redis services; verify Redis outage recovery manually.
+- **Evidence / test result:** `.venv\Scripts\ruff.exe check .` passed (`All checks passed!`). With temporary PostgreSQL 16 and Redis 7 containers running, `.venv\Scripts\python.exe -m pytest -q` passed (**28 passed**). The worker integration test launched a separate `--pool=solo` Celery worker and observed the smoke task return `{"status": "ok"}`. For recovery, the worker was started against an unavailable local Redis port, stayed running for six seconds, then connected after Redis started and processed the smoke task successfully. The liveness tests confirmed `/health` returns `200 {"status":"ok"}` while Redis is unavailable. Temporary containers were stopped after verification.
+- **How to run the worker locally:** Start Redis, set `KNOWCAST_REDIS_URL` (or use the local default), change to `backend`, then run `..\.venv\Scripts\python.exe -m celery -A app.workers.celery_app:celery_app worker --pool=solo --loglevel=INFO`.
+- **Blockers:** None.
 
 #### Chunk 5 — Docker Compose and foundation closeout
 
@@ -244,6 +247,8 @@ Retain resolved errors here so recovery steps are visible. Add a new entry rathe
 | 2026-11-21 | Chunk 3 dependency install | Initial dependency installation could not reach the package index from the restricted environment. | Retried the approved package installation with network access. | SQLAlchemy, Alembic, Psycopg 3 and their dependencies installed successfully. | Resolved |
 | 2026-11-21 | Chunk 3 settings test | A URL containing a password was assumed malformed, but Pydantic correctly accepted it as a valid PostgreSQL DSN. | Changed the validation test to use an invalid port while checking that the password portion is absent from the error. | Full pytest suite passed; invalid URL validation did not reveal the secret. | Resolved |
 | 2026-11-21 | Chunk 3 Ruff | Ruff flagged import ordering and line length in newly added database modules and generated migration code. | Applied Ruff's import fixes and formatting, then corrected remaining long declarations. | `.venv\Scripts\ruff.exe check .` passed (`All checks passed!`). | Resolved |
+| 2026-11-21 | Chunk 4 settings and task tests | Initial test inputs treated a loosely formatted Redis URL as invalid and compared Celery task proxies by object identity. | Used an invalid port for validation and compared the stable registered task name instead. | Worker unit tests passed; full suite passed (28 tests). | Resolved |
+| 2026-11-21 | Chunk 4 worker integration | The first live worker test did not locate the backend package from the subprocess working directory, so the task result was not observed. | Ran the worker and task producer from the `backend` directory and used a separate producer process with the configured Redis URL. | Redis worker integration test passed; task returned `{"status": "ok"}`. | Resolved |
 
 ## Decision and blocker log
 
@@ -267,3 +272,14 @@ At the end of each milestone, add a dated entry with the files changed, decision
 - **Open issues:** None for Chunk 3.
 - **Review guidance:** Review the initial schema revision and the chosen nullable email-ingestion URL / `SET NULL` relationships. The migration was generated and manually reviewed, then exercised through the full disposable-database lifecycle.
 - **Suggested commit:** `feat: establish database foundation`
+
+### Chunk 4 closeout — 2026-11-21
+
+- **Files:** Added Redis settings and `.env.example` value; added `backend/app/workers/` with the Celery app and smoke task; added worker unit and Redis integration tests. Updated README, dependencies, and this tracker.
+- **Decisions:** Redis is both the Celery broker and result backend. Worker startup reconnects indefinitely with Celery's increasing retry delays. FastAPI startup and `/health` do not connect to Redis. No in-memory fallback or newsletter-processing tasks were added.
+- **Modules:** `core/config.py` owns the typed Redis URL setting; `workers/celery_app.py` creates the Celery app and declares broker, result, retry, serialization, and task discovery settings; `workers/tasks.py` provides the one smoke task used by the integration check.
+- **Run locally:** Start Redis, set `KNOWCAST_REDIS_URL` (or use `redis://localhost:6379/0`), change to `backend`, then run `..\.venv\Scripts\python.exe -m celery -A app.workers.celery_app:celery_app worker --pool=solo --loglevel=INFO`. Run `.venv\Scripts\ruff.exe check .` and `.venv\Scripts\python.exe -m pytest -q`. Set `KNOWCAST_TEST_REDIS_URL` to a disposable local Redis URL to enable the live worker test.
+- **Verification:** Ruff passed. Full pytest passed: **28 passed** with PostgreSQL 16 and Redis 7 integration services available. Worker start-before-Redis recovery was manually verified and returned `{"status": "ok"}` after Redis started. Health remained independent of Redis. Temporary containers were stopped.
+- **Open issues:** None for Chunk 4. Docker Compose and combined foundation startup remain in Chunk 5.
+- **Review guidance:** Review the Celery retry settings, task registration, and worker run command. No `NON-OBVIOUS` comments were added; Celery connection retries are explicit configuration values.
+- **Suggested commit:** `feat: configure redis and celery worker`

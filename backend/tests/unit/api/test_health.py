@@ -30,6 +30,18 @@ def test_health_endpoint_does_not_connect_to_configured_database(
     assert response.json() == {"status": "ok"}
 
 
+def test_health_endpoint_does_not_connect_to_redis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Redis availability is not part of the infrastructure liveness check."""
+    monkeypatch.setenv("KNOWCAST_REDIS_URL", "redis://127.0.0.1:1/0")
+    with TestClient(create_app()) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_invalid_settings_prevent_app_creation_without_echoing_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

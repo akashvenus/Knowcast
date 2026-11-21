@@ -15,13 +15,14 @@ Knowcast/
 │   │   ├── core/                     # Pydantic application settings
 │   │   ├── db/                       # Declarative metadata and DB sessions
 │   │   ├── models/                   # Nine PostgreSQL entity models
+│   │   ├── workers/                  # Celery app and background task modules
 │   │   └── main.py                   # FastAPI app factory and ASGI entry point
 │   ├── migrations/
 │   │   ├── versions/                 # Initial schema migration
 │   │   └── env.py                    # Alembic settings and metadata wiring
 │   ├── tests/
-│   │   ├── integration/              # Disposable PostgreSQL migration test
-│   │   └── unit/                     # API, settings, session, and model tests
+│   │   ├── integration/              # Disposable PostgreSQL and Redis checks
+│   │   └── unit/                     # API, settings, database, model, and worker tests
 │   ├── alembic.ini                   # Migration tool configuration
 │   └── requirements.txt              # Backend and development dependencies
 ├── docs/
